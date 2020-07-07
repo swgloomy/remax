@@ -1,6 +1,7 @@
 import propsAlias, { propAlias } from './propsAlias';
 import { TYPE_TEXT } from './constants';
 import Container from './Container';
+import * as RuntimeOptions from './RuntimeOptions';
 
 export interface RawNode {
   id: number;
@@ -190,10 +191,10 @@ export default class VNode {
     for (let i = 0; i < payload.length; i = i + 2) {
       const [propName, propValue] = toRawProps(payload[i], payload[i + 1], this.type);
 
-      let path = this.parent!.path + '.nodes.' + this.id + '.props';
+      let path = [...this.parent!.path, 'nodes', this.id.toString(), 'props'];
 
-      if (process.env.REMAX_PLATFORM === 'ali') {
-        path = this.parent!.path + '.children[' + this.index + '].props';
+      if (RuntimeOptions.get('platform') === 'ali') {
+        path = [...this.parent!.path, `children[${this.index}].props`];
       }
 
       this.container.requestUpdate({
@@ -231,7 +232,7 @@ export default class VNode {
   }
 
   get path() {
-    let dataPath = 'root';
+    const dataPath: string[] = [];
     const parents = [];
     let parent = this.parent;
 
@@ -243,10 +244,12 @@ export default class VNode {
     for (let i = 0; i < parents.length; i++) {
       const child = parents[i + 1] || this;
 
-      if (process.env.REMAX_PLATFORM === 'ali') {
-        dataPath += '.children.' + child.index + '';
+      if (RuntimeOptions.get('platform') === 'ali') {
+        dataPath.push('children');
+        dataPath.push(child.index.toString());
       } else {
-        dataPath += '.nodes.' + child.id + '';
+        dataPath.push('nodes');
+        dataPath.push(child.id.toString());
       }
     }
 
@@ -283,13 +286,13 @@ export default class VNode {
         const currentVNode = children[i];
         const currentRawNode = toRawNode(currentVNode);
 
-        if (process.env.REMAX_PLATFORM !== 'ali') {
+        if (RuntimeOptions.get('platform') !== 'ali') {
           currentNode.children!.unshift(currentRawNode.id);
         } else {
           currentNode.children!.unshift(currentRawNode);
         }
 
-        if (process.env.REMAX_PLATFORM !== 'ali') {
+        if (RuntimeOptions.get('platform') !== 'ali') {
           if (!currentNode.nodes) {
             currentNode.nodes = {};
           }

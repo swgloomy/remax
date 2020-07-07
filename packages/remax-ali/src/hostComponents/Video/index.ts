@@ -5,7 +5,7 @@ export interface VideoProps {
   id?: string;
   className?: string;
   poster?: string;
-  objectFit?: 'contain' | 'fill';
+  objectFit?: 'contain' | 'fill' | 'cover';
   initialTime?: number;
   duration?: number;
   controls?: boolean;
@@ -18,6 +18,7 @@ export interface VideoProps {
   showCenterPlayBtn?: boolean;
   showMuteBtn?: boolean;
   enableProgressGesture?: boolean;
+  enableNative?: boolean;
   mobilenetHintType?: 0 | 1 | 3;
   onPlay?: (e: any) => void;
   onPause?: (e: any) => void;

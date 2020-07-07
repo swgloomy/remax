@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { pluginDriver } from '@remax/runtime-plugin';
+import * as RuntimeOptions from './RuntimeOptions';
 import createPageWrapper from './createPageWrapper';
 import { Lifecycle, callbackName, pageEvents } from './lifecycle';
 import stopPullDownRefresh from './stopPullDownRefresh';
@@ -25,8 +25,10 @@ export default function createPageConfig(Page: React.ComponentType<any>, name: s
 
   const config: any = {
     data: {
-      action: {},
       root: {
+        children: [],
+      },
+      modalRoot: {
         children: [],
       },
     },
@@ -36,14 +38,17 @@ export default function createPageConfig(Page: React.ComponentType<any>, name: s
     lifecycleCallback: {} as any,
 
     onLoad(this: any, query: any) {
-      const PageWrapper = createPageWrapper(Page, query);
+      const PageWrapper = createPageWrapper(Page);
       this.pageId = generatePageId();
 
       this.query = query;
-      this.container = new Container(this);
+      this.container = new Container(this, 'root');
+      this.modalContainer = new Container(this, 'modalRoot');
       this.element = createPortal(
         React.createElement(PageWrapper, {
           page: this,
+          query,
+          modalContainer: this.modalContainer,
           ref: this.wrapperRef,
         }),
         this.container,
@@ -187,5 +192,5 @@ export default function createPageConfig(Page: React.ComponentType<any>, name: s
     }
   });
 
-  return pluginDriver.onPageConfig(config);
+  return RuntimeOptions.get('pluginDriver').onPageConfig(config);
 }
