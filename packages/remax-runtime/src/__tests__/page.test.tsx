@@ -3,17 +3,15 @@ import './helpers/setupGlobals';
 import createPageConfig from '../createPageConfig';
 import { usePageEvent } from '../../src';
 import { PageProps } from '../createPageWrapper';
+import * as RuntimeOptions from '../RuntimeOptions';
 import View from './helpers/View';
 import Page from './helpers/Page';
 
-jest.mock('../stopPullDownRefresh', () => () => void 0);
-jest.mock('../RuntimeOptions', () => ({
-  get(key: 'appEvents' | 'pageEvents') {
-    const options = {
-      pluginDriver: {
-        onAppConfig: (config: any) => config,
-        onPageConfig: (config: any) => config,
-      },
+const TEST_PAGE = 'pages/test/index';
+
+describe('page', () => {
+  beforeAll(() => {
+    RuntimeOptions.apply({
       appEvents: [
         'onLaunch',
         'onShow',
@@ -42,15 +40,13 @@ jest.mock('../RuntimeOptions', () => ({
           'onTabItemTap',
         ],
       },
-    };
+    });
+  });
 
-    return options[key];
-  },
-}));
+  afterAll(() => {
+    RuntimeOptions.reset();
+  });
 
-const TEST_PAGE = 'pages/test/index';
-
-describe('page', () => {
   it('create page config', () => {
     const Foo = () => {
       return <View>foo</View>;
